@@ -3,3 +3,4 @@ DL/lightning_logs
 DL/wandb
 DL/YearPredictionMSD.txt
 get-pip.py
+DAA/catboost_info
