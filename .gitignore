@@ -4,3 +4,5 @@ DL/wandb
 DL/YearPredictionMSD.txt
 get-pip.py
 DAA/catboost_info
+DAA/music_dataset.csv
+DAA/tracks_info.csv
