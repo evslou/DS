@@ -102,7 +102,8 @@ def _(colors, plt, regions):
     plt.title('Happiness score by region')
     plt.xlabel('Regions')
     plt.ylabel('Happiness score')
-    plt.xticks(rotation=45, ha='right');
+    plt.xticks(rotation=45, ha='right')
+    plt.show()
     return
 
 
@@ -120,6 +121,7 @@ def _(df_1, plt):
     plt.bar(dfreg.index, dfreg)
     plt.title('Happiness level by region')
     plt.xticks(rotation=45, ha='right')
+    plt.show()
     return
 
 
@@ -127,6 +129,7 @@ def _(df_1, plt):
 def _(df_1, plt):
     plt.hist(df_1['Happiness score'])
     plt.title('Happiness level histogram')
+    plt.show()
     return
 
 
@@ -247,7 +250,8 @@ def _(LabelEncoder, dfCode):
 def _(dfCode, plt, sns):
     plt.figure(figsize=(20, 15))
     plt.title('Correlation map')
-    sns.heatmap(dfCode.corr(numeric_only=True), annot=True, cmap='coolwarm');
+    sns.heatmap(dfCode.corr(numeric_only=True), annot=True, cmap='coolwarm')
+    plt.show()
     return
 
 
@@ -373,6 +377,7 @@ def _(
 def _(np, plt, y_pred, y_test):
     _nn = np.arange(min(y_test), max(y_test), 0.01)
     _fig, _ax = plt.subplots()
+    _ax.fill_between(_nn, _nn + 1, _nn - 1, color='green', alpha=0.3)
     _ax.scatter(y_test, y_pred)
 
     _ax.plot(_nn, _nn, color='red')
@@ -380,7 +385,6 @@ def _(np, plt, y_pred, y_test):
     plt.xlabel('Real results')
     plt.ylabel('Prediction results')
     plt.title('Comparing the real and prediction results for LinearRegression')
-    _ax.fill_between(_nn, _nn + 1, _nn - 1, color='green', alpha=0.3)
     return
 
 
@@ -388,12 +392,12 @@ def _(np, plt, y_pred, y_test):
 def _(np, plt, y_pred2, y_test):
     _nn = np.arange(min(y_test), max(y_test), 0.01)
     _fig, _ax = plt.subplots()
+    _ax.fill_between(_nn, _nn + 1, _nn - 1, color='green', alpha=0.3)
     _ax.scatter(y_test, y_pred2)
     _ax.plot(_nn, _nn, color='red')
     plt.xlabel('Real results')
     plt.ylabel('Prediction results')
-    plt.title('Comparing the real and prediction results for LassoRegression at aplha 0.001')
-    _ax.fill_between(_nn, _nn + 1, _nn - 1, color='green', alpha=0.3)
+    plt.title('Comparing the real and prediction results for Lasso Regression at aplha 0.001')
     return
 
 
@@ -401,14 +405,14 @@ def _(np, plt, y_pred2, y_test):
 def _(np, plt, y_pred, y_pred2, y_test):
     _nn = np.arange(min(y_test), max(y_test), 0.01)
     _fig, _ax = plt.subplots()
-    _ax.scatter(y_test, y_pred, label= 'Default regression')
-    _ax.scatter(y_test, y_pred2, color= 'green', label= 'Lasso pred')
+    _ax.fill_between(_nn, _nn + 1, _nn - 1, color='green', alpha=0.3)
+    _ax.scatter(y_test, y_pred, label= 'LinearRegression', edgecolor='darkblue', s=55)
+    _ax.scatter(y_test, y_pred2, color='orangered', label= 'Lasso', alpha=0.7, edgecolor='darkred', s=25)
     _ax.plot(_nn, _nn, color='red')
     plt.legend()
     plt.xlabel('Real results')
     plt.ylabel('Prediction results')
     plt.title('Comparing the defaul LinearRegression and Lasso')
-    _ax.fill_between(_nn, _nn + 1, _nn - 1, color='green', alpha=0.3)
     return
 
 
@@ -455,6 +459,25 @@ def _(
 
 
 @app.cell
+def _(RandomForestRegressor, X_train, y_train):
+    from sklearn.model_selection import GridSearchCV
+    parameters = {'n_estimators': [10, 50, 100, 250], 
+                  'criterion': ['squared_error', 'absolute_error', 'friedman_mse',
+                                'poisson'],
+                 'max_depth': [3, 6, 10, 20]}
+    _modelRFR2 = RandomForestRegressor(random_state=13)
+    clf = GridSearchCV(_modelRFR2, parameters)
+    clf.fit(X_train, y_train)
+    return GridSearchCV, clf
+
+
+@app.cell
+def _(clf):
+    clf.best_params_
+    return
+
+
+@app.cell
 def _(
     RandomForestRegressor,
     X_test,
@@ -467,7 +490,11 @@ def _(
     y_test,
     y_train,
 ):
-    modelRFR2 = RandomForestRegressor(random_state=13, n_estimators=1000, max_depth=10, criterion='poisson')
+    modelRFR2 = RandomForestRegressor(
+        random_state=13, 
+        n_estimators=1000, max_depth=10, 
+        criterion='friedman_mse')
+
     modelRFR2.fit(X_train, y_train)
     y_predRFR2 = modelRFR2.predict(X_test)
     print('Best number of trees')
@@ -483,12 +510,12 @@ def _(
 def _(np, plt, y_predRFR, y_test):
     _nn = np.arange(min(y_test), max(y_test), 0.01)
     _fig, _ax = plt.subplots()
+    _ax.fill_between(_nn, _nn + 1, _nn - 1, color='green', alpha=0.3)
     _ax.scatter(y_test, y_predRFR)
     _ax.plot(_nn, _nn, color='red')
     plt.xlabel('Real results')
     plt.ylabel('Prediction results')
     plt.title('Comparing the real and prediction results for RandomForestRegressor')
-    _ax.fill_between(_nn, _nn + 1, _nn - 1, color='green', alpha=0.3)
     return
 
 
@@ -496,12 +523,12 @@ def _(np, plt, y_predRFR, y_test):
 def _(np, plt, y_predRFR2, y_test):
     _nn = np.arange(min(y_test), max(y_test), 0.01)
     _fig, _ax = plt.subplots()
+    _ax.fill_between(_nn, _nn + 1, _nn - 1, color='green', alpha=0.3)
     _ax.scatter(y_test, y_predRFR2)
     _ax.plot(_nn, _nn, color='red')
     plt.xlabel('Real results')
     plt.ylabel('Prediction results')
-    plt.title('Comparing the real and prediction results for RandomForestRegressor with choosing parameters')
-    _ax.fill_between(_nn, _nn + 1, _nn - 1, color='green', alpha=0.3)
+    plt.title("Comparing the real and prediction results for RandomForestRegressor: \nn_estimators=1000, max_depth=10, criterion='friedman_mse")
     return
 
 
@@ -509,14 +536,14 @@ def _(np, plt, y_predRFR2, y_test):
 def _(np, plt, y_predRFR, y_predRFR2, y_test):
     _nn = np.arange(min(y_test), max(y_test), 0.01)
     _fig, _ax = plt.subplots()
-    _ax.scatter(y_test, y_predRFR, label='default')
-    _ax.scatter(y_test, y_predRFR2, color='green', label='Hyper')
+    _ax.fill_between(_nn, _nn + 1, _nn - 1, color='green', alpha=0.3)
+    _ax.scatter(y_test, y_predRFR, label='Default', color='dodgerblue', edgecolors="darkblue", s=50)
+    _ax.scatter(y_test, y_predRFR2, color='orangered', label='Tuned', s=30, edgecolors="darkred", alpha=0.8)
     _ax.plot(_nn, _nn, color='red')
     plt.legend()
     plt.xlabel('Real results')
     plt.ylabel('Prediction results')
     plt.title('Comparing the real and prediction results for RandomForestRegressor')
-    _ax.fill_between(_nn, _nn + 1, _nn - 1, color='green', alpha=0.3)
     return
 
 
@@ -524,10 +551,11 @@ def _(np, plt, y_predRFR, y_predRFR2, y_test):
 def _(np, plt, y_predRFR, y_test):
     counts, bins = np.histogram(y_predRFR - y_test)
     _fig, _ax = plt.subplots()
-    plt.title('Distribution of mistakes')
+    plt.title('Distribution of errors')
     plt.xlabel('(y_pred - y_test)')
     plt.ylabel('Count')
     _ax.hist(bins[:-1], bins, weights=counts)
+    plt.show()
     return
 
 
@@ -555,7 +583,7 @@ def _(X_train, modelRFR2):
 def _(modelRFR, plt):
     from sklearn import tree
     plt.figure(figsize=(40, 30))
-    tree.plot_tree(modelRFR.estimators_[0], max_depth=2);
+    tree.plot_tree(modelRFR.estimators_[0], max_depth=2)
     return
 
 
@@ -593,6 +621,15 @@ def _(
 
 @app.cell
 def _():
+    parameters_1 = {'loss': ['squared_error', 'absolute_error', 'huber', 'quantile'], 'learning_rate': [0.0001, 0.001, 0.01, 0.1], 'n_estimators': [10, 50, 100, 250], 'criterion': ['friedman_mse', 'squared_error']}
+    return (parameters_1,)
+
+
+@app.cell
+def _(GradientBoostingRegressor, GridSearchCV, X_train, parameters_1, y_train):
+    _modelGBR2 = GradientBoostingRegressor(random_state=13)
+    _clf = GridSearchCV(_modelGBR2, parameters_1)
+    _clf.fit(X_train, y_train)
     return
 
 
@@ -622,12 +659,12 @@ def _(
 def _(np, plt, y_predGBR, y_test):
     _nn = np.arange(min(y_test), max(y_test), 0.01)
     _fig, _ax = plt.subplots()
+    _ax.fill_between(_nn, _nn + 1, _nn - 1, color='green', alpha=0.3)
     _ax.scatter(y_test, y_predGBR)
     _ax.plot(_nn, _nn, color='red')
     plt.xlabel('Real results')
     plt.ylabel('Prediction results')
-    plt.title('Comparing the real and prediction results for GradientBoostingRegressor')
-    _ax.fill_between(_nn, _nn + 1, _nn - 1, color='green', alpha=0.3)
+    plt.title("Comparing the real and prediction results for GradientBoostingRegressor")
     return
 
 
@@ -635,28 +672,26 @@ def _(np, plt, y_predGBR, y_test):
 def _(np, plt, y_predGBR2, y_test):
     _nn = np.arange(min(y_test), max(y_test), 0.01)
     _fig, _ax = plt.subplots()
+    _ax.fill_between(_nn, _nn + 1, _nn - 1, color='green', alpha=0.3)
     _ax.scatter(y_test, y_predGBR2)
     _ax.plot(_nn, _nn, color='red')
     plt.xlabel('Real results')
     plt.ylabel('Prediction results')
-    plt.title('Comparing the real and prediction results for GradientBoostingRegressor')
+    plt.title("Comparing the real and prediction results for GradientBoostingRegressor: \ncriterion='squared_error', loss='huber', n_estimators=200, learning_rate=0.1")
+    return
+
+
+@app.cell
+def _(np, plt, y_predGBR, y_predGBR2, y_test):
+    _nn = np.arange(min(y_test), max(y_test), 0.01)
+    _fig, _ax = plt.subplots()
     _ax.fill_between(_nn, _nn + 1, _nn - 1, color='green', alpha=0.3)
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    # Using Marimo for ML model setting
-    """)
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    ## Linear regression
-    """)
+    _ax.scatter(y_test, y_predGBR, label='Default', s=50, color='dodgerblue', edgecolors="darkblue")
+    _ax.scatter(y_test, y_predGBR2, label='Tuned', s=30, edgecolors="darkred", alpha=0.8, color='orangered')
+    _ax.plot(_nn, _nn, color='red')
+    plt.xlabel('Real results')
+    plt.ylabel('Prediction results')
+    plt.title("Comparing the real and prediction results for GradientBoostingRegressor: \ncriterion='squared_error', loss='huber', n_estimators=200, learning_rate=0.1")
     return
 
 
@@ -700,183 +735,76 @@ def _(
     print()
     _nn = np.arange(min(y_test), max(y_test), 0.01)
     _fig, _ax = plt.subplots()
+    _ax.fill_between(_nn, _nn + 1, _nn - 1, color='green', alpha=0.3)
     _ax.scatter(y_test, y_pred2_m)
     _ax.plot(_nn, _nn, color='red')
     plt.xlabel('Real results')
     plt.ylabel('Prediction results')
     plt.title('Comparing the real and prediction results for LassoRegression at aplha')
-    _ax.fill_between(_nn, _nn + 1, _nn - 1, color='green', alpha=0.3)
     return
 
 
-@app.cell(hide_code=True)
+@app.cell
 def _(mo):
     mo.md(r"""
-    ## Random Forest
+    ### User Dashboard
     """)
     return
 
 
 @app.cell
 def _(mo):
-    d_rfr = mo.ui.dictionary({
-                            "n_estimators": mo.ui.slider(5,1500, step= 5),
-                            "max_depth": mo.ui.slider(5,50, step= 5),
-                            "criterion": mo.ui.dropdown(options = ['squared_error', 'absolute_error', 'friedman_mse','poisson'],allow_select_none=False, value= 'squared_error')})
-    d_rfr
-    return (d_rfr,)
-
-
-@app.cell(hide_code=True)
-def _(
-    RandomForestRegressor,
-    X_test,
-    X_train,
-    d_rfr,
-    mean_absolute_error,
-    mean_absolute_percentage_error,
-    mean_squared_error,
-    np,
-    plt,
-    r2_score,
-    y_test,
-    y_train,
-):
-    modelRFR2_marimo = RandomForestRegressor(random_state=13, n_estimators= d_rfr['n_estimators'].value, max_depth= d_rfr['max_depth'].value, criterion= d_rfr['criterion'].value)
-    modelRFR2_marimo.fit(X_train, y_train)
-    y_predRFR2_marimo = modelRFR2_marimo.predict(X_test)
-    print(f'MAE: {mean_absolute_error(y_test, y_predRFR2_marimo)}')
-    print(f'MSE: {mean_squared_error(y_test, y_predRFR2_marimo)}')
-    print(f'RMSE: {np.sqrt(mean_squared_error(y_test, y_predRFR2_marimo))}')
-    print(f'MAPE: {mean_absolute_percentage_error(y_test, y_predRFR2_marimo)}')
-    print(f'R^2: {r2_score(y_test, y_predRFR2_marimo)}')
-
-    _nn = np.arange(min(y_test), max(y_test), 0.01)
-    _fig, _ax = plt.subplots()
-    _ax.scatter(y_test, y_predRFR2_marimo)
-    _ax.plot(_nn, _nn, color='red')
-    plt.xlabel('Real results')
-    plt.ylabel('Prediction results')
-    plt.title('Comparing the real and prediction results for RandomForestRegressor with choosing parameters')
-    _ax.fill_between(_nn, _nn + 1, _nn - 1, color='green', alpha=0.3)
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    ## Gradient Boosting
-    """)
+    gdp = mo.ui.slider(0, 10, step= 1)
+    socSup = mo.ui.slider(0, 1, step= 0.01)
+    health = mo.ui.slider(35, 90, step= 1)
+    freedom = mo.ui.slider(0, 1, step= 0.01)
+    generosity = mo.ui.slider(0, 1, step= 0.01)
+    corruption = mo.ui.slider(0, 1, step= 0.01)
+    region = mo.ui.text()
     return
 
 
 @app.cell
 def _(mo):
-    d_gb = mo.ui.dictionary({
-                            "n_estimators": mo.ui.slider(5,1500, step= 5),
-                            "learning_rate": mo.ui.slider(0.0001,1, step= 0.0001),
-                            "criterion": mo.ui.dropdown(options = ['squared_error','friedman_mse'],allow_select_none=False, value= 'squared_error'),
-    "loss": mo.ui.dropdown(options = ['squared_error', 'absolute_error', 'huber', 'quantile'],allow_select_none=False, value= 'squared_error')})
-    d_gb
-    return (d_gb,)
-
-
-@app.cell(hide_code=True)
-def _(
-    GradientBoostingRegressor,
-    X_test,
-    X_train,
-    d_gb,
-    mean_absolute_error,
-    mean_absolute_percentage_error,
-    mean_squared_error,
-    np,
-    plt,
-    r2_score,
-    y_test,
-    y_train,
-):
-    modelGBR2_marimo = GradientBoostingRegressor(random_state=13, criterion=d_gb['criterion'].value, loss=d_gb['loss'].value, n_estimators=d_gb['n_estimators'].value, learning_rate=d_gb['learning_rate'].value) 
-    modelGBR2_marimo.fit(X_train, y_train)
-    y_predgb2_marimo = modelGBR2_marimo.predict(X_test)
-    print(f'MAE: {mean_absolute_error(y_test, y_predgb2_marimo)}')
-    print(f'MSE: {mean_squared_error(y_test, y_predgb2_marimo)}')
-    print(f'RMSE: {np.sqrt(mean_squared_error(y_test, y_predgb2_marimo))}')
-    print(f'MAPE: {mean_absolute_percentage_error(y_test, y_predgb2_marimo)}')
-    print(f'R^2: {r2_score(y_test, y_predgb2_marimo)}')
-
-    _nn = np.arange(min(y_test), max(y_test), 0.01)
-    _fig, _ax = plt.subplots()
-    _ax.scatter(y_test, y_predgb2_marimo)
-    _ax.plot(_nn, _nn, color='red')
-    plt.xlabel('Real results')
-    plt.ylabel('Prediction results')
-    plt.title('Comparing the real and prediction results for Gradient Boosting with choosing parameters')
-    _ax.fill_between(_nn, _nn + 1, _nn - 1, color='green', alpha=0.3)
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    # User Dashboard
-    """)
-    return
-
-
-@app.cell
-def _(mo, regions):
-    Region = mo.ui.dropdown(options=regions.keys(),allow_select_none= False, value= "Central and Eastern Europe")
-    mo.md(f"Please choose Region: {Region}")
-    return (Region,)
-
-
-@app.cell(hide_code=True)
-def _(Region, X_train, mo):
-    d = mo.ui.dictionary({
-    "GDP per capita": mo.ui.slider(0, 10, step= 1, value= X_train[X_train[f"Region_{Region.value}"] == True]['GDP per capita'].mean()),
-    "Social support": mo.ui.slider(0, 1, step= 0.01, value= X_train[X_train[f"Region_{Region.value}"] == True]['Social support'].mean()),
-    "Healthy life expectancy": mo.ui.slider(35, 90, step= 1, value= X_train[X_train[f"Region_{Region.value}"] == True]['Healthy life expectancy'].mean()),
-    "Freedom to make life choices": mo.ui.slider(0, 1, step= 0.01, value = X_train[X_train[f"Region_{Region.value}"] == True]['Freedom to make life choices'].mean()),
-    "Generosity": mo.ui.slider(0, 1, step= 0.01, value= X_train[X_train[f"Region_{Region.value}"] == True]['Generosity'].mean()),
-    "Perceptions of corruption": mo.ui.slider(0, 1, step= 0.01, value= X_train[X_train[f"Region_{Region.value}"] == True]['Perceptions of corruption'].mean() )})
-
-    mo.md(f"Choose user input data: {d}")
-
+    d = mo.ui.dictionary({"gdp": mo.ui.slider(0, 10, step= 1),
+                         "socSup": mo.ui.slider(0, 1, step= 0.01),
+                         "health": mo.ui.slider(35, 90, step= 1),
+                         "freedom": mo.ui.slider(0, 1, step= 0.01),
+                         "generosity": mo.ui.slider(0, 1, step= 0.01),
+                         "corruption": mo.ui.slider(0, 1, step= 0.01),
+                         "region": mo.ui.text()})
+    d
     return (d,)
 
 
-@app.cell(hide_code=True)
-def _(Region, X_train, d, regions):
-    user_data ={"GDP per capita": d['GDP per capita'].value,
-                "Social support": d['Social support'].value,
-                "Healthy life expectancy": d['Healthy life expectancy'].value,
-                "Freedom to make life choices":d['Freedom to make life choices'].value,
-                "Generosity": d['Generosity'].value,
-                "Perceptions of corruption": d['Perceptions of corruption'].value}
-    for regs in regions.keys():
-        s = f"Region_{regs}"
-        if Region.value == regs:             
-            user_data[s] = True
-        else:
-            user_data[s] = False
-    print("Input data is", user_data)
-    print("Average values for chosen region", Region.value)
-    print(X_train[X_train[f"Region_{Region.value}"] == True][["GDP per capita", "Social support", "Healthy life expectancy", "Freedom to make life choices", "Generosity", "Perceptions of corruption"]].mean())
+@app.cell
+def _(d, regions):
+    user_data ={"GDP per capita": d['gdp'].value,
+                "Social support": d['socSup'].value,
+                "Healthy life expectancy": d['health'].value,
+                "Freedom to make life choices":d['freedom'].value,
+               "Generosity": d['generosity'].value,
+               "Perceptions of corruption": d['corruption'].value}
+    if d['region'].value not in regions.keys():
+        print('No such region. Try again. List of regions:', regions.keys())
+    else:
+        for regs in regions.keys():
+            s= f"Region_{regs}"
+            if d['region'].value == regs: 
+                user_data[s] = True
+            else:
+                user_data[s] = False
+    print(user_data)
     return (user_data,)
 
 
 @app.cell
-def _(Region, X_train, modelRFR2, pd, user_data, y_train):
+def _(X_train, modelRFR2, pd, user_data):
     user_test = pd.DataFrame(user_data, index=[0])
-    y_user = modelRFR2.predict(user_test[X_train.columns])
-    print("Predicted Happiness level:", round(*y_user, 2))
-    print('Current average happiness', round(y_train[X_train[f"Region_{Region.value}"] == True].mean(), 2) )
-    return
+    model_features = X_train.columns
 
-
-@app.cell
-def _():
+    y_user = modelRFR2.predict(user_test[model_features])
+    print(y_user)
     return
 
 
