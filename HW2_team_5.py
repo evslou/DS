@@ -475,7 +475,7 @@ def _(RandomForestRegressor, X_train, y_train):
 @app.cell
 def _(clf):
     # clf.best_params_
-    # return
+    return
 
 
 @app.cell
