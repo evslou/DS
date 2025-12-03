@@ -459,19 +459,6 @@ def _(
 
 
 @app.cell
-def _(RandomForestRegressor, X_train, y_train):
-    from sklearn.model_selection import GridSearchCV
-    parameters = {'n_estimators': [10, 50, 100, 250], 
-                  'criterion': ['squared_error', 'absolute_error', 'friedman_mse',
-                                'poisson'],
-                 'max_depth': [3, 6, 10, 20]}
-    _modelRFR2 = RandomForestRegressor(random_state=13)
-    clf = GridSearchCV(_modelRFR2, parameters)
-    clf.fit(X_train, y_train)
-    return GridSearchCV, clf
-
-
-@app.cell
 def _(clf):
     clf.best_params_
     return
@@ -617,20 +604,6 @@ def _(
     print(f"RMSE: {np.sqrt(mean_squared_error(y_test, y_predGBR))}")
     print(f"R^2: {r2_score(y_test, y_predGBR)}")
     return GradientBoostingRegressor, y_predGBR
-
-
-@app.cell
-def _():
-    parameters_1 = {'loss': ['squared_error', 'absolute_error', 'huber', 'quantile'], 'learning_rate': [0.0001, 0.001, 0.01, 0.1], 'n_estimators': [10, 50, 100, 250], 'criterion': ['friedman_mse', 'squared_error']}
-    return (parameters_1,)
-
-
-@app.cell
-def _(GradientBoostingRegressor, GridSearchCV, X_train, parameters_1, y_train):
-    _modelGBR2 = GradientBoostingRegressor(random_state=13)
-    _clf = GridSearchCV(_modelGBR2, parameters_1)
-    _clf.fit(X_train, y_train)
-    return
 
 
 @app.cell
