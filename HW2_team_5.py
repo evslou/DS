@@ -459,9 +459,23 @@ def _(
 
 
 @app.cell
-def _(clf):
-    clf.best_params_
+def _(RandomForestRegressor, X_train, y_train):
+    # from sklearn.model_selection import GridSearchCV
+    # parameters = {'n_estimators': [100, 500, 1000, 1500], 
+    #               'criterion': ['squared_error', 'absolute_error', 'friedman_mse',
+    #                             'poisson'],
+    #              'max_depth': [10, 30, 50]}
+    # _modelRFR2 = RandomForestRegressor(random_state=13)
+    # clf = GridSearchCV(_modelRFR2, parameters)
+    # clf.fit(X_train, y_train)
+    # return GridSearchCV, clf
     return
+
+
+@app.cell
+def _(clf):
+    # clf.best_params_
+    # return
 
 
 @app.cell
@@ -607,6 +621,20 @@ def _(
 
 
 @app.cell
+def _():
+    parameters_1 = {'loss': ['squared_error', 'absolute_error', 'huber', 'quantile'], 'learning_rate': [0, 0.0001, 0.001, 0.01, 0.1, 0.5], 'n_estimators': [1, 5, 10, 20, 50, 100, 200, 500, 100], 'criterion': ['friedman_mse', 'squared_error']}
+    return (parameters_1,)
+
+
+@app.cell
+def _(GradientBoostingRegressor, GridSearchCV, X_train, parameters_1, y_train):
+    # _modelGBR2 = GradientBoostingRegressor(random_state=13)
+    # _clf = GridSearchCV(_modelGBR2, parameters_1)
+    # _clf.fit(X_train, y_train)
+    return
+
+
+@app.cell
 def _(
     GradientBoostingRegressor,
     X_test,
@@ -716,68 +744,207 @@ def _(
     plt.title('Comparing the real and prediction results for LassoRegression at aplha')
     return
 
-
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    ### User Dashboard
+    ## Random Forest
     """)
     return
 
 
 @app.cell
 def _(mo):
-    gdp = mo.ui.slider(0, 10, step= 1)
-    socSup = mo.ui.slider(0, 1, step= 0.01)
-    health = mo.ui.slider(35, 90, step= 1)
-    freedom = mo.ui.slider(0, 1, step= 0.01)
-    generosity = mo.ui.slider(0, 1, step= 0.01)
-    corruption = mo.ui.slider(0, 1, step= 0.01)
-    region = mo.ui.text()
+    d_rfr = mo.ui.dictionary({
+                            "n_estimators": mo.ui.slider(5,1500, step= 5),
+                            "max_depth": mo.ui.slider(5,50, step= 5),
+                            "criterion": mo.ui.dropdown(options = ['squared_error', 'absolute_error', 'friedman_mse','poisson'],allow_select_none=False, value= 'squared_error')})
+    d_rfr
+    return (d_rfr,)
+
+
+@app.cell(hide_code=True)
+def _(
+    RandomForestRegressor,
+    X_test,
+    X_train,
+    d_rfr,
+    mean_absolute_error,
+    mean_absolute_percentage_error,
+    mean_squared_error,
+    np,
+    plt,
+    r2_score,
+    y_test,
+    y_train,
+):
+    modelRFR2_marimo = RandomForestRegressor(random_state=13, n_estimators= d_rfr['n_estimators'].value, max_depth= d_rfr['max_depth'].value, criterion= d_rfr['criterion'].value)
+    modelRFR2_marimo.fit(X_train, y_train)
+    y_predRFR2_marimo = modelRFR2_marimo.predict(X_test)
+    print(f'MAE: {mean_absolute_error(y_test, y_predRFR2_marimo)}')
+    print(f'MSE: {mean_squared_error(y_test, y_predRFR2_marimo)}')
+    print(f'RMSE: {np.sqrt(mean_squared_error(y_test, y_predRFR2_marimo))}')
+    print(f'MAPE: {mean_absolute_percentage_error(y_test, y_predRFR2_marimo)}')
+    print(f'R^2: {r2_score(y_test, y_predRFR2_marimo)}')
+
+    _nn = np.arange(min(y_test), max(y_test), 0.01)
+    _fig, _ax = plt.subplots()
+    _ax.scatter(y_test, y_predRFR2_marimo)
+    _ax.plot(_nn, _nn, color='red')
+    plt.xlabel('Real results')
+    plt.ylabel('Prediction results')
+    plt.title('Comparing the real and prediction results for RandomForestRegressor with choosing parameters')
+    _ax.fill_between(_nn, _nn + 1, _nn - 1, color='green', alpha=0.3)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## Gradient Boosting
+    """)
     return
 
 
 @app.cell
 def _(mo):
-    d = mo.ui.dictionary({"gdp": mo.ui.slider(0, 10, step= 1),
-                         "socSup": mo.ui.slider(0, 1, step= 0.01),
-                         "health": mo.ui.slider(35, 90, step= 1),
-                         "freedom": mo.ui.slider(0, 1, step= 0.01),
-                         "generosity": mo.ui.slider(0, 1, step= 0.01),
-                         "corruption": mo.ui.slider(0, 1, step= 0.01),
-                         "region": mo.ui.text()})
-    d
+    d_gb = mo.ui.dictionary({
+                            "n_estimators": mo.ui.slider(5,1500, step= 5),
+                            "learning_rate": mo.ui.slider(0.0001,1, step= 0.0001),
+                            "criterion": mo.ui.dropdown(options = ['squared_error','friedman_mse'],allow_select_none=False, value= 'squared_error'),
+    "loss": mo.ui.dropdown(options = ['squared_error', 'absolute_error', 'huber', 'quantile'],allow_select_none=False, value= 'squared_error')})
+    d_gb
+    return (d_gb,)
+
+
+@app.cell(hide_code=True)
+def _(
+    GradientBoostingRegressor,
+    X_test,
+    X_train,
+    d_gb,
+    mean_absolute_error,
+    mean_absolute_percentage_error,
+    mean_squared_error,
+    np,
+    plt,
+    r2_score,
+    y_test,
+    y_train,
+):
+    modelGBR2_marimo = GradientBoostingRegressor(random_state=13, criterion=d_gb['criterion'].value, loss=d_gb['loss'].value, n_estimators=d_gb['n_estimators'].value, learning_rate=d_gb['learning_rate'].value) 
+    modelGBR2_marimo.fit(X_train, y_train)
+    y_predgb2_marimo = modelGBR2_marimo.predict(X_test)
+    print(f'MAE: {mean_absolute_error(y_test, y_predgb2_marimo)}')
+    print(f'MSE: {mean_squared_error(y_test, y_predgb2_marimo)}')
+    print(f'RMSE: {np.sqrt(mean_squared_error(y_test, y_predgb2_marimo))}')
+    print(f'MAPE: {mean_absolute_percentage_error(y_test, y_predgb2_marimo)}')
+    print(f'R^2: {r2_score(y_test, y_predgb2_marimo)}')
+
+    _nn = np.arange(min(y_test), max(y_test), 0.01)
+    _fig, _ax = plt.subplots()
+    _ax.scatter(y_test, y_predgb2_marimo)
+    _ax.plot(_nn, _nn, color='red')
+    plt.xlabel('Real results')
+    plt.ylabel('Prediction results')
+    plt.title('Comparing the real and prediction results for Gradient Boosting with choosing parameters')
+    _ax.fill_between(_nn, _nn + 1, _nn - 1, color='green', alpha=0.3)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    # User Dashboard
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    year = mo.ui.dropdown(options= [i for i in range(2015, 2025)],allow_select_none=False, value= 2015)
+    mo.md(f"Please choose year: {year}")
+    return (year,)
+
+
+@app.cell(hide_code=True)
+def _(mo, regions):
+    Region = mo.ui.dropdown(options=regions.keys(),allow_select_none= False, value= "Central and Eastern Europe")
+    mo.md(f"Please choose Region: {Region}")
+    return (Region,)
+
+
+@app.cell(hide_code=True)
+def _(Region, dfCode, plt, year):
+    pie = dfCode[(dfCode.Year == year.value) & (dfCode['Regional indicator'] == Region.value)]
+
+    plt.pie(pie['Happiness score'], labels = pie.Country.tolist())
+    plt.title(f'Country happiness in region {Region.value}')
+    plt.show()
+    return
+
+
+@app.cell(hide_code=True)
+def _(Region, dfCode, mo, year):
+    cntrylist = dfCode[(dfCode['Regional indicator'] == Region.value) & (dfCode.Year == year.value)].Country.unique()
+    Country = mo.ui.dropdown(options= cntrylist, allow_select_none= False,value=cntrylist[0])
+
+    mo.md(f"Please choose Country: {Country}")
+    return (Country,)
+
+
+@app.cell(hide_code=True)
+def _(Country, df, dfCode, plt, year):
+    print("Happiness level for", Country.value, "in", year.value, "is", *dfCode[(df['Country'] == Country.value) & (df.Year == year.value)]['Happiness score'])
+    countrydata = dfCode[(dfCode['Country'] == Country.value)]
+    colors_bar = ['blue'] * len(countrydata.Year) 
+    colors_bar[year.value - 2015] = 'green'
+    bar = plt.bar(countrydata.Year, countrydata['Happiness score'], color= colors_bar)
+    plt.title(f"Happiness level for {Country.value}")
+    plt.show()
+    return
+
+
+@app.cell(hide_code=True)
+def _(Region, dfCode, mo):
+    d = mo.ui.dictionary({
+    "GDP per capita": mo.ui.slider(0, 10, step= 1, value= dfCode[dfCode[f"Region_{Region.value}"] == True]['GDP per capita'].mean()),
+    "Social support": mo.ui.slider(0, 1, step= 0.01, value= dfCode[dfCode[f"Region_{Region.value}"] == True]['Social support'].mean()),
+    "Healthy life expectancy": mo.ui.slider(35, 90, step= 1, value= dfCode[dfCode[f"Region_{Region.value}"] == True]['Healthy life expectancy'].mean()),
+    "Freedom to make life choices": mo.ui.slider(0, 1, step= 0.01, value = dfCode[dfCode[f"Region_{Region.value}"] == True]['Freedom to make life choices'].mean()),
+    "Generosity": mo.ui.slider(0, 1, step= 0.01, value= dfCode[dfCode[f"Region_{Region.value}"] == True]['Generosity'].mean()),
+    "Perceptions of corruption": mo.ui.slider(0, 1, step= 0.01, value= dfCode[dfCode[f"Region_{Region.value}"] == True]['Perceptions of corruption'].mean() )})
+
+    mo.md(f"Choose user input data for predicting happiness in {Region.value}: {d}")
+
     return (d,)
 
 
-@app.cell
-def _(d, regions):
-    user_data ={"GDP per capita": d['gdp'].value,
-                "Social support": d['socSup'].value,
-                "Healthy life expectancy": d['health'].value,
-                "Freedom to make life choices":d['freedom'].value,
-               "Generosity": d['generosity'].value,
-               "Perceptions of corruption": d['corruption'].value}
-    if d['region'].value not in regions.keys():
-        print('No such region. Try again. List of regions:', regions.keys())
-    else:
-        for regs in regions.keys():
-            s= f"Region_{regs}"
-            if d['region'].value == regs: 
-                user_data[s] = True
-            else:
-                user_data[s] = False
-    print(user_data)
+@app.cell(hide_code=True)
+def _(Region, d, dfCode, regions):
+    user_data ={"GDP per capita": d['GDP per capita'].value,
+                "Social support": d['Social support'].value,
+                "Healthy life expectancy": d['Healthy life expectancy'].value,
+                "Freedom to make life choices":d['Freedom to make life choices'].value,
+                "Generosity": d['Generosity'].value,
+                "Perceptions of corruption": d['Perceptions of corruption'].value}
+    for regs in regions.keys():
+        s = f"Region_{regs}"
+        if Region.value == regs:             
+            user_data[s] = True
+        else:
+            user_data[s] = False
+    print("Input data is", user_data)
+    print("Average values for chosen region", Region.value)
+    print(dfCode[dfCode[f"Region_{Region.value}"] == True][["GDP per capita", "Social support", "Healthy life expectancy", "Freedom to make life choices", "Generosity", "Perceptions of corruption"]].mean())
     return (user_data,)
 
 
-@app.cell
-def _(X_train, modelRFR2, pd, user_data):
+@app.cell(hide_code=True)
+def _(Region, X_train, dfCode, modelRFR2, pd, user_data):
     user_test = pd.DataFrame(user_data, index=[0])
-    model_features = X_train.columns
-
-    y_user = modelRFR2.predict(user_test[model_features])
-    print(y_user)
+    y_user = modelRFR2.predict(user_test[X_train.columns])
+    print("Predicted Happiness level:", round(*y_user, 2))
+    print('Current average happiness', round(dfCode[dfCode[f"Region_{Region.value}"] == True]['Happiness score'].mean(), 2) )
     return
 
 
