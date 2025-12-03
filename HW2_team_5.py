@@ -41,7 +41,7 @@ def _(mo):
 
 @app.cell
 def _(pd):
-    df = pd.read_csv("world_happiness_combined.csv", delimiter=";")
+    df = pd.read_csv("https://github.com/evslou/DS/blob/00b5345218e3d56dabede60ad64c22f97efce951/world_happiness_combined.csv?raw=true", delimiter=";")
     return (df,)
 
 
