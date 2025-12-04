@@ -95,7 +95,7 @@ def _(plt):
 @app.cell
 def _(colors, plt, regions):
     plt.figure(figsize=(13, 7))
-    bp = plt.boxplot(regions.values(), tick_labels=regions.keys(), patch_artist=True)
+    bp = plt.boxplot(regions.values(), labels=regions.keys(), patch_artist=True)
 
     for box, color in zip(bp['boxes'], colors):
         box.set(facecolor=color)
@@ -289,29 +289,41 @@ def _(mo):
 
 
 @app.cell
+def _():
+    from sklearn.ensemble import RandomForestRegressor
+    from sklearn.model_selection import cross_validate, cross_val_predict
+
+    return (
+        cross_validate, 
+        cross_val_predict,
+        RandomForestRegressor
+    )
+
+
+@app.cell
 def _(
+    RandomForestRegressor,
     X_test,
     X_train,
-    mean_absolute_error,
-    mean_absolute_percentage_error,
-    mean_squared_error,
+    cross_validate,
+    cross_val_predict,
     np,
-    r2_score,
     y_test,
     y_train,
 ):
-    from sklearn.ensemble import RandomForestRegressor
-
     modelRFR = RandomForestRegressor(random_state=13)
     modelRFR.fit(X_train, y_train)
     y_predRFR = modelRFR.predict(X_test)
 
-    print(f"MAE: {mean_absolute_error(y_test, y_predRFR)}")
-    print(f"MSE: {mean_squared_error(y_test, y_predRFR)}")
-    print(f"RMSE: {np.sqrt(mean_squared_error(y_test, y_predRFR))}")
-    print(f"MAPE: {mean_absolute_percentage_error(y_test, y_predRFR)}")
-    print(f"R^2: {r2_score(y_test, y_predRFR)}")
-    return RandomForestRegressor, modelRFR, y_predRFR
+    scoresRFR = cross_validate(modelRFR, X_train, y_train, cv=5,
+                            scoring=('r2', 'neg_mean_absolute_error', 'neg_mean_squared_error', 'neg_root_mean_squared_error', 'neg_mean_absolute_percentage_error'))
+    print(f"MAE: {-scoresRFR['test_neg_mean_absolute_error'].mean()}")
+    print(f"MSE: {-scoresRFR['test_neg_mean_squared_error'].mean()}")
+    print(f"RMSE: {-scoresRFR['test_neg_root_mean_squared_error'].mean()}")
+    print(f"MAPE: {-scoresRFR['test_neg_mean_absolute_percentage_error'].mean()}")
+    print(f"R^2: {scoresRFR['test_r2'].mean()}")
+    
+    return modelRFR, y_predRFR, scoresRFR
 
 
 @app.cell(hide_code=True)
@@ -325,11 +337,9 @@ def _(
     RandomForestRegressor,
     X_test,
     X_train,
-    mean_absolute_error,
-    mean_absolute_percentage_error,
-    mean_squared_error,
+    cross_validate,
+    cross_val_predict,
     np,
-    r2_score,
     y_test,
     y_train,
 ):
@@ -340,13 +350,16 @@ def _(
 
     modelRFR2.fit(X_train, y_train)
     y_predRFR2 = modelRFR2.predict(X_test)
-    print('Best parametrs from GridSearch')
-    print(f'MAE: {mean_absolute_error(y_test, y_predRFR2)}')
-    print(f'MSE: {mean_squared_error(y_test, y_predRFR2)}')
-    print(f'RMSE: {np.sqrt(mean_squared_error(y_test, y_predRFR2))}')
-    print(f'MAPE: {mean_absolute_percentage_error(y_test, y_predRFR2)}')
-    print(f'R^2: {r2_score(y_test, y_predRFR2)}')
-    return modelRFR2, y_predRFR2
+    
+    scoresRFR2 = cross_validate(modelRFR2, X_train, y_train, cv=5,
+                            scoring=('r2', 'neg_mean_absolute_error', 'neg_mean_squared_error', 'neg_root_mean_squared_error', 'neg_mean_absolute_percentage_error'))
+    print(f"MAE: {-scoresRFR2['test_neg_mean_absolute_error'].mean()}")
+    print(f"MSE: {-scoresRFR2['test_neg_mean_squared_error'].mean()}")
+    print(f"RMSE: {-scoresRFR2['test_neg_root_mean_squared_error'].mean()}")
+    print(f"MAPE: {-scoresRFR2['test_neg_mean_absolute_percentage_error'].mean()}")
+    print(f"R^2: {scoresRFR2['test_r2'].mean()}")
+    
+    return modelRFR2, y_predRFR2, scoresRFR2
 
 
 @app.cell
@@ -435,9 +448,6 @@ def _(
     y_test,
     y_train,
 ):
-    from sklearn.ensemble import RandomForestRegressor
-    from sklearn.model_selection import cross_validate, cross_val_predict
-
     modelRFR2_marimo = RandomForestRegressor(random_state=13, n_estimators= d_rfr['n_estimators'].value, max_depth= d_rfr['max_depth'].value, criterion= d_rfr['criterion'].value)
     scores = cross_validate(modelRFR2_marimo, X_train, y_train, cv=5,
                             scoring=('r2', 'neg_mean_absolute_error', 'neg_mean_squared_error', 'neg_root_mean_squared_error', 'neg_mean_absolute_percentage_error'))
