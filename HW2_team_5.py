@@ -7,7 +7,7 @@ app = marimo.App()
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    # Homework 1: Predicting World Happiness Level Using Machine Learning
+    # Homework 2: Predicting World Happiness Level Using Machine Learning
     """)
     return
 
@@ -275,6 +275,124 @@ def _(dfCode, train_test_split):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
+    2. RandomForest:
+    """)
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""
+    Default random forest
+    """)
+    return
+
+
+@app.cell
+def _(
+    X_test,
+    X_train,
+    mean_absolute_error,
+    mean_absolute_percentage_error,
+    mean_squared_error,
+    np,
+    r2_score,
+    y_test,
+    y_train,
+):
+    from sklearn.ensemble import RandomForestRegressor
+
+    modelRFR = RandomForestRegressor(random_state=13)
+    modelRFR.fit(X_train, y_train)
+    y_predRFR = modelRFR.predict(X_test)
+
+    print(f"MAE: {mean_absolute_error(y_test, y_predRFR)}")
+    print(f"MSE: {mean_squared_error(y_test, y_predRFR)}")
+    print(f"RMSE: {np.sqrt(mean_squared_error(y_test, y_predRFR))}")
+    print(f"MAPE: {mean_absolute_percentage_error(y_test, y_predRFR)}")
+    print(f"R^2: {r2_score(y_test, y_predRFR)}")
+    return RandomForestRegressor, modelRFR, y_predRFR
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.image(src="https://i.ibb.co/cSCPyvVG/grid-Search-Rand-Forest.jpg")
+    return
+
+
+@app.cell
+def _(
+    RandomForestRegressor,
+    X_test,
+    X_train,
+    mean_absolute_error,
+    mean_absolute_percentage_error,
+    mean_squared_error,
+    np,
+    r2_score,
+    y_test,
+    y_train,
+):
+    modelRFR2 = RandomForestRegressor(
+        random_state=13, 
+        n_estimators=1000, max_depth=30, 
+        criterion='squared_error')
+
+    modelRFR2.fit(X_train, y_train)
+    y_predRFR2 = modelRFR2.predict(X_test)
+    print('Best parametrs from GridSearch')
+    print(f'MAE: {mean_absolute_error(y_test, y_predRFR2)}')
+    print(f'MSE: {mean_squared_error(y_test, y_predRFR2)}')
+    print(f'RMSE: {np.sqrt(mean_squared_error(y_test, y_predRFR2))}')
+    print(f'MAPE: {mean_absolute_percentage_error(y_test, y_predRFR2)}')
+    print(f'R^2: {r2_score(y_test, y_predRFR2)}')
+    return modelRFR2, y_predRFR2
+
+
+@app.cell
+def _(np, plt, y_predRFR, y_test):
+    _nn = np.arange(min(y_test), max(y_test), 0.01)
+    _fig, _ax = plt.subplots()
+    _ax.fill_between(_nn, _nn + 1, _nn - 1, color='green', alpha=0.3)
+    _ax.scatter(y_test, y_predRFR)
+    _ax.plot(_nn, _nn, color='red')
+    plt.xlabel('Real results')
+    plt.ylabel('Prediction results')
+    plt.title('Comparing the real and prediction results for RandomForestRegressor')
+    return
+
+
+@app.cell
+def _(np, plt, y_predRFR2, y_test):
+    _nn = np.arange(min(y_test), max(y_test), 0.01)
+    _fig, _ax = plt.subplots()
+    _ax.fill_between(_nn, _nn + 1, _nn - 1, color='green', alpha=0.3)
+    _ax.scatter(y_test, y_predRFR2)
+    _ax.plot(_nn, _nn, color='red')
+    plt.xlabel('Real results')
+    plt.ylabel('Prediction results')
+    plt.title("Comparing the real and prediction results for RandomForestRegressor: \nn_estimators=1000, max_depth=10, criterion='friedman_mse")
+    return
+
+
+@app.cell
+def _(np, plt, y_predRFR, y_predRFR2, y_test):
+    _nn = np.arange(min(y_test), max(y_test), 0.01)
+    _fig, _ax = plt.subplots()
+    _ax.fill_between(_nn, _nn + 1, _nn - 1, color='green', alpha=0.3)
+    _ax.scatter(y_test, y_predRFR, label='Default', color='dodgerblue', edgecolors="darkblue", s=50)
+    _ax.scatter(y_test, y_predRFR2, color='orangered', label='Tuned', s=30, edgecolors="darkred", alpha=0.8)
+    _ax.plot(_nn, _nn, color='red')
+    plt.legend()
+    plt.xlabel('Real results')
+    plt.ylabel('Prediction results')
+    plt.title('Comparing the real and prediction results for RandomForestRegressor')
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
     # ML hyperparametors constructor
     """)
     return
@@ -291,12 +409,6 @@ def _(mo):
     mo.md(r"""
     ## Random Forest
     """)
-    return
-    
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.image(src="gridSearchRandForest.jpg")
     return
 
 
